@@ -10,13 +10,15 @@ Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host "Push Medical Administration Portal to GitHub" -ForegroundColor Cyan
 Write-Host "==========================================" -ForegroundColor Cyan
 
+$defaultUrl = "https://github.com/samithkumar2315-cloud/medical-admin-portal.git"
 if (-not $RepoUrl) {
-    $RepoUrl = Read-Host "Paste your GitHub Repository URL (e.g. https://github.com/your-name/medical-portal.git)"
-}
-
-if (-not $RepoUrl) {
-    Write-Host "No repository URL provided. Aborted." -ForegroundColor Red
-    exit 1
+    Write-Host "Default Repository URL: $defaultUrl" -ForegroundColor Gray
+    $inputUrl = Read-Host "Press Enter to use default, or paste a different URL"
+    if ($inputUrl) {
+        $RepoUrl = $inputUrl
+    } else {
+        $RepoUrl = $defaultUrl
+    }
 }
 
 # Remove existing origin if already present
