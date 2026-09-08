@@ -35,7 +35,27 @@ const Login = () => {
         navigate('/subadmin/dashboard', { replace: true });
       }
     } catch (err) {
-      const message = err.response?.data?.message || 'Invalid username or password.';
+      const message = err.response?.data?.message || err.message || 'Invalid username or password.';
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleQuickLogin = async (u, p) => {
+    setUsername(u);
+    setPassword(p);
+    setError('');
+    setLoading(true);
+    try {
+      const user = await login(u, p);
+      if (user.role === 'Administrator') {
+        navigate('/admin/dashboard', { replace: true });
+      } else if (user.role === 'SubAdministrator') {
+        navigate('/subadmin/dashboard', { replace: true });
+      }
+    } catch (err) {
+      const message = err.response?.data?.message || err.message || 'Invalid username or password.';
       setError(message);
     } finally {
       setLoading(false);
@@ -116,16 +136,12 @@ const Login = () => {
         </form>
 
         <div className="demo-credentials-card" id="demo-credentials">
-          <span className="demo-credentials-title">Demo Accounts (Click to auto-fill):</span>
+          <span className="demo-credentials-title">Demo Accounts (Click to Instant Login):</span>
           <div className="demo-credentials-buttons">
             <button
               type="button"
               className="demo-badge-btn"
-              onClick={() => {
-                setUsername('admin');
-                setPassword('Admin@123');
-                setError('');
-              }}
+              onClick={() => handleQuickLogin('admin', 'Admin@123')}
             >
               <span className="demo-role admin">Administrator</span>
               <code>admin / Admin@123</code>
@@ -133,11 +149,7 @@ const Login = () => {
             <button
               type="button"
               className="demo-badge-btn"
-              onClick={() => {
-                setUsername('subadmin');
-                setPassword('SubAdmin@123');
-                setError('');
-              }}
+              onClick={() => handleQuickLogin('subadmin', 'SubAdmin@123')}
             >
               <span className="demo-role subadmin">Sub-Admin</span>
               <code>subadmin / SubAdmin@123</code>

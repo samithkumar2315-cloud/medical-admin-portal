@@ -3,27 +3,79 @@ import { getStoredUsers } from './mockData';
 
 export const authService = {
   login: async (username, password) => {
+    const trimmedUsername = (username || '').trim().toLowerCase();
+    const cleanPassword = (password || '').trim();
+
+    // 1. First try live backend if it responds quickly
     try {
-      const response = await api.post('/auth/login', { username, password });
-      // If server returned valid JSON object with token
-      if (response.data && response.data.token) {
+      const response = await api.post(
+        '/auth/login',
+        { username: (username || '').trim(), password },
+        { timeout: 2500 }
+      );
+      if (response && response.data && typeof response.data === 'object' && response.data.token) {
         return response.data;
       }
     } catch (err) {
-      // If it was a real 400 with invalid credentials from live backend, rethrow
-      if (err.response?.status === 400 && err.response?.data?.message) {
+      // If live backend explicitly returned 400 with a validation error, only rethrow if not on standalone host
+      if (err.response && typeof err.response.data === 'object' && err.response.data?.message && err.response.status === 400) {
+        // live backend reached and rejected
         throw err;
       }
-      // Otherwise live API server is not reachable on this host (e.g. Netlify)
     }
 
-    // Fallback authentication for standalone / Netlify deployment
-    const users = getStoredUsers();
-    const found = users.find(u => u.username.toLowerCase() === username.trim().toLowerCase());
-    if (found && found.password === password) {
-      const mockToken = `mock-jwt-token-${found.username}-${Date.now()}`;
+    // 2. Direct hardcoded guarantee for default demo credentials (immediate on Netlify)
+    if (trimmedUsername === 'admin' && (cleanPassword === 'Admin@123' || password === 'Admin@123')) {
       return {
-        token: mockToken,
+        token: `demo-token-admin-${Date.now()}`,
+        user: {
+          id: 1,
+          username: "admin",
+          fullName: "System Administrator",
+          role: "Administrator",
+          email: "admin@medportal.com",
+          phone: "+1-555-0100",
+          permissions: [
+            "VIEW_MEDICAL_DATA",
+            "SEARCH_FILTER_SORT",
+            "VIEW_RECORD_DETAILS",
+            "UPDATE_OWN_PROFILE",
+            "CHANGE_PASSWORD"
+          ]
+        }
+      };
+    }
+
+    if (trimmedUsername === 'subadmin' && (cleanPassword === 'SubAdmin@123' || password === 'SubAdmin@123')) {
+      return {
+        token: `demo-token-subadmin-${Date.now()}`,
+        user: {
+          id: 2,
+          username: "subadmin",
+          fullName: "Sub Administrator",
+          role: "SubAdministrator",
+          email: "subadmin@medportal.com",
+          phone: "+1-555-0200",
+          permissions: [
+            "VIEW_MEDICAL_DATA",
+            "SEARCH_FILTER_SORT",
+            "VIEW_RECORD_DETAILS",
+            "CREATE_MEDICAL_DATA",
+            "EDIT_MEDICAL_DATA",
+            "DELETE_MEDICAL_DATA",
+            "UPDATE_OWN_PROFILE",
+            "CHANGE_PASSWORD"
+          ]
+        }
+      };
+    }
+
+    // 3. Check dynamically registered staff accounts in localStorage
+    const users = getStoredUsers();
+    const found = users.find(u => u.username.toLowerCase() === trimmedUsername);
+    if (found && (found.password === password || found.password === cleanPassword)) {
+      return {
+        token: `demo-token-${found.username}-${Date.now()}`,
         user: {
           id: found.id,
           username: found.username,
