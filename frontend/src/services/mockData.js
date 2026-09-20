@@ -295,7 +295,7 @@ export const initialUsers = [
     id: 2,
     username: "subadmin",
     password: "SubAdmin@123",
-    fullName: "Sub Administrator",
+    fullName: "Sup Administrator",
     email: "subadmin@medportal.com",
     phone: "+1-555-0200",
     role: "SubAdministrator",

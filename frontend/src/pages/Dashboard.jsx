@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/Toast';
+import { useNotifications } from '../context/NotificationContext';
 import { medicalRecordService } from '../services/medicalRecordService';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
@@ -17,6 +18,7 @@ import { FiFileText, FiUsers, FiCheckCircle, FiGrid, FiPlus, FiDownload } from '
 const Dashboard = () => {
   const { user, isSubAdmin } = useAuth();
   const toast = useToast();
+  const { addNotification } = useNotifications();
 
   // State
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -102,12 +104,24 @@ const Dashboard = () => {
     try {
       setFormLoading(true);
       await medicalRecordService.create(data);
-      toast.success('Medical record created successfully.');
+      const patientName = data.patientName || 'Patient';
+      const patientId = data.patientId || '';
+      toast.success(
+        `Patient "${patientName}" (${patientId}) has been successfully added to clinical records.`,
+        'Patient Added'
+      );
+      addNotification({
+        title: 'Patient Added',
+        message: `Patient "${patientName}" (${patientId}) was registered by ${user?.fullName || 'Sup Administrator'}.`,
+        type: 'patient_added',
+        patientId,
+        patientName,
+      });
       setShowForm(false);
       fetchRecords();
       fetchStats();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to create record.');
+      toast.error(err.response?.data?.message || 'Failed to create record.', 'Registration Error');
     } finally {
       setFormLoading(false);
     }
@@ -117,12 +131,24 @@ const Dashboard = () => {
     try {
       setFormLoading(true);
       await medicalRecordService.update(editRecord.id, data);
-      toast.success('Medical record updated successfully.');
+      const patientName = data.patientName || editRecord?.patientName || 'Patient';
+      const patientId = data.patientId || editRecord?.patientId || '';
+      toast.success(
+        `Patient record for "${patientName}" has been updated successfully.`,
+        'Patient Updated'
+      );
+      addNotification({
+        title: 'Patient Record Updated',
+        message: `Clinical details for "${patientName}" were updated by ${user?.fullName || 'Sup Administrator'}.`,
+        type: 'patient_updated',
+        patientId,
+        patientName,
+      });
       setEditRecord(null);
       fetchRecords();
       fetchStats();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to update record.');
+      toast.error(err.response?.data?.message || 'Failed to update record.', 'Update Error');
     } finally {
       setFormLoading(false);
     }
@@ -130,13 +156,25 @@ const Dashboard = () => {
 
   const handleDelete = async () => {
     try {
+      const removedPatientName = deleteRecord?.patientName || 'Patient';
+      const removedPatientId = deleteRecord?.patientId || '';
       await medicalRecordService.delete(deleteRecord.id);
-      toast.success('Medical record deleted successfully.');
+      toast.success(
+        `Patient record for "${removedPatientName}" has been successfully removed from the system.`,
+        'Patient Removed'
+      );
+      addNotification({
+        title: 'Patient Removed',
+        message: `Patient "${removedPatientName}" ${removedPatientId ? `(${removedPatientId})` : ''} was removed from records.`,
+        type: 'patient_removed',
+        patientId: removedPatientId,
+        patientName: removedPatientName,
+      });
       setDeleteRecord(null);
       fetchRecords();
       fetchStats();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to delete record.');
+      toast.error(err.response?.data?.message || 'Failed to delete record.', 'Delete Error');
     }
   };
 
@@ -189,7 +227,7 @@ const Dashboard = () => {
     }
   };
 
-  const roleName = user?.role === 'SubAdministrator' ? 'Sub-Administrator' : 'Administrator';
+  const roleName = user?.role === 'SubAdministrator' ? 'Sup Administrator' : 'Administrator';
 
   return (
     <div className="layout">

@@ -52,7 +52,7 @@ export const authService = {
         user: {
           id: 2,
           username: "subadmin",
-          fullName: "Sub Administrator",
+          fullName: "Sup Administrator",
           role: "SubAdministrator",
           email: "subadmin@medportal.com",
           phone: "+1-555-0200",

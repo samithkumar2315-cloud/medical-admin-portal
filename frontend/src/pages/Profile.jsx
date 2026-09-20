@@ -116,7 +116,7 @@ const Profile = () => {
                   <h2>{profile?.fullName}</h2>
                   <span className="role-badge">
                     <FiShield size={12} />
-                    {profile?.role === 'SubAdministrator' ? 'Sub-Administrator' : profile?.role}
+                    {profile?.role === 'SubAdministrator' ? 'Sup Administrator' : profile?.role}
                   </span>
                 </div>
               </div>
@@ -140,7 +140,7 @@ const Profile = () => {
                       <div className="profile-info-item">
                         <span className="label"><FiShield size={12} /> Role</span>
                         <span className="value">
-                          {profile?.role === 'SubAdministrator' ? 'Sub-Administrator' : profile?.role}
+                          {profile?.role === 'SubAdministrator' ? 'Sup Administrator' : profile?.role}
                         </span>
                       </div>
                       <div className="profile-info-item">
@@ -171,7 +171,7 @@ const Profile = () => {
                       </div>
                       <div className="form-group">
                         <label>Role</label>
-                        <input type="text" value={profile?.role === 'SubAdministrator' ? 'Sub-Administrator' : profile?.role} disabled style={{ opacity: 0.6 }} />
+                        <input type="text" value={profile?.role === 'SubAdministrator' ? 'Sup Administrator' : profile?.role} disabled style={{ opacity: 0.6 }} />
                       </div>
                       <div className="form-group">
                         <label>Full Name *</label>

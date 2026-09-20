@@ -32,7 +32,7 @@ public static class DbSeeder
             {
                 Username = "subadmin",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("SubAdmin@123"),
-                FullName = "Sub Administrator",
+                FullName = "Sup Administrator",
                 Email = "subadmin@medportal.com",
                 Phone = "+1-555-0200",
                 Role = UserRole.SubAdministrator,

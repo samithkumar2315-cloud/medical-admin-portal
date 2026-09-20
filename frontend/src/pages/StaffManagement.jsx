@@ -150,7 +150,7 @@ const StaffManagement = () => {
                         </td>
                         <td>
                           <span className={`role-badge ${u.role.toLowerCase()}`}>
-                            <FiShield size={12} /> {u.role === 'Administrator' ? 'Administrator (Read-Only)' : 'Sub-Administrator (Full CRUD)'}
+                            <FiShield size={12} /> {u.role === 'Administrator' ? 'Administrator (Read-Only)' : 'Sup Administrator (Full CRUD)'}
                           </span>
                         </td>
                         <td>
@@ -259,7 +259,7 @@ const StaffManagement = () => {
                         value={formData.role}
                         onChange={handleInputChange}
                       >
-                        <option value="SubAdministrator">Sub-Administrator (Full CRUD on Records)</option>
+                        <option value="SubAdministrator">Sup Administrator (Full CRUD on Records)</option>
                         <option value="Administrator">Administrator (Read-Only Records & Analytics)</option>
                       </select>
                     </div>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FiUser, FiLock, FiEye, FiEyeOff, FiShield, FiAlertCircle, FiActivity } from 'react-icons/fi';
+import { FiEye, FiEyeOff, FiShield, FiAlertCircle, FiActivity } from 'react-icons/fi';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -83,7 +83,6 @@ const Login = () => {
           <div className="form-group">
             <label htmlFor="username">Username</label>
             <div className="input-wrapper">
-              <FiUser className="input-icon" />
               <input
                 id="username"
                 type="text"
@@ -99,7 +98,6 @@ const Login = () => {
           <div className="form-group">
             <label htmlFor="password">Password</label>
             <div className="input-wrapper">
-              <FiLock className="input-icon" />
               <input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
@@ -151,7 +149,7 @@ const Login = () => {
               className="demo-badge-btn"
               onClick={() => handleQuickLogin('subadmin', 'SubAdmin@123')}
             >
-              <span className="demo-role subadmin">Sub-Admin</span>
+              <span className="demo-role subadmin">Sup Administrator</span>
               <code>subadmin / SubAdmin@123</code>
             </button>
           </div>

@@ -1,20 +1,24 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/Toast';
+import { useNotifications } from '../context/NotificationContext';
 import { medicalRecordService } from '../services/medicalRecordService';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
+import ConfirmDialog from '../components/ConfirmDialog';
+import MedicalRecordForm from '../components/MedicalRecordForm';
 import {
   FiUsers, FiSearch, FiClock, FiCalendar,
   FiActivity, FiX, FiPrinter, FiChevronRight,
-  FiChevronLeft, FiFileText
+  FiChevronLeft, FiFileText, FiPlus, FiTrash2
 } from 'react-icons/fi';
 
 const Patients = () => {
-  const { user } = useAuth();
+  const { user, isSubAdmin } = useAuth();
   const toast = useToast();
+  const { addNotification } = useNotifications();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [patients, setPatients] = useState([]);
@@ -24,6 +28,11 @@ const Patients = () => {
   const [pageSize] = useState(8);
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+
+  // Add / Delete patient modal state
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [deletePatient, setDeletePatient] = useState(null);
+  const [actionLoading, setActionLoading] = useState(false);
 
   // Patient detail modal
   const [selectedPatientId, setSelectedPatientId] = useState(null);
@@ -81,6 +90,69 @@ const Patients = () => {
     window.print();
   };
 
+  const handleAddPatient = async (formData) => {
+    try {
+      setActionLoading(true);
+      await medicalRecordService.create(formData);
+      const patientName = formData.patientName || 'Patient';
+      const patientId = formData.patientId || '';
+      toast.success(
+        `Patient "${patientName}" (${patientId}) has been successfully added to clinical records.`,
+        'Patient Added'
+      );
+      addNotification({
+        title: 'Patient Added',
+        message: `Patient "${patientName}" (${patientId}) was registered in the directory by ${user?.fullName || 'Sup Administrator'}.`,
+        type: 'patient_added',
+        patientId,
+        patientName,
+      });
+      setShowAddModal(false);
+      fetchPatients();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to add patient.', 'Registration Error');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleConfirmDeletePatient = async () => {
+    if (!deletePatient) return;
+    try {
+      setActionLoading(true);
+      const patientName = deletePatient.patientName || 'Patient';
+      const patientId = deletePatient.patientId || '';
+
+      const history = await medicalRecordService.getPatientHistory(patientId);
+      if (history?.records && history.records.length > 0) {
+        for (const rec of history.records) {
+          await medicalRecordService.delete(rec.id);
+        }
+      }
+
+      toast.success(
+        `Patient "${patientName}" (${patientId}) and associated clinical records were removed.`,
+        'Patient Removed'
+      );
+      addNotification({
+        title: 'Patient Removed',
+        message: `Patient "${patientName}" (${patientId}) was removed from directory by ${user?.fullName || 'Sup Administrator'}.`,
+        type: 'patient_removed',
+        patientId,
+        patientName,
+      });
+      setDeletePatient(null);
+      if (selectedPatientId === patientId) {
+        closePatientHistory();
+      }
+      fetchPatients();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to remove patient.', 'Removal Error');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   return (
     <div className="layout">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
@@ -101,6 +173,15 @@ const Patients = () => {
               <span className="badge-count">
                 <FiUsers /> {totalCount} Registered Patients
               </span>
+              {isSubAdmin() && (
+                <button
+                  className="btn btn-primary"
+                  onClick={() => setShowAddModal(true)}
+                  id="add-patient-btn"
+                >
+                  <FiPlus /> Add Patient
+                </button>
+              )}
             </div>
           </div>
 
@@ -188,8 +269,23 @@ const Patients = () => {
                     </div>
 
                     <div className="patient-card-footer">
-                      <span>View Medical History</span>
-                      <FiChevronRight />
+                      <span className="patient-view-action">View Medical History</span>
+                      <div className="patient-card-btns">
+                        {isSubAdmin() && (
+                          <button
+                            type="button"
+                            className="patient-card-delete-btn"
+                            title={`Remove ${p.patientName}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeletePatient(p);
+                            }}
+                          >
+                            <FiTrash2 size={13} /> Remove
+                          </button>
+                        )}
+                        <FiChevronRight />
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -346,6 +442,24 @@ const Patients = () => {
               </div>
             </div>
           )}
+          {/* Add Patient Modal */}
+          <MedicalRecordForm
+            isOpen={showAddModal}
+            onClose={() => setShowAddModal(false)}
+            onSubmit={handleAddPatient}
+            loading={actionLoading}
+          />
+
+          {/* Confirm Delete Patient Dialog */}
+          <ConfirmDialog
+            isOpen={!!deletePatient}
+            title="Remove Patient Records"
+            message={`Are you sure you want to remove all clinical records for patient "${deletePatient?.patientName}" (${deletePatient?.patientId})? This action cannot be undone.`}
+            confirmText="Remove Patient"
+            confirmType="danger"
+            onConfirm={handleConfirmDeletePatient}
+            onCancel={() => setDeletePatient(null)}
+          />
         </main>
       </div>
     </div>

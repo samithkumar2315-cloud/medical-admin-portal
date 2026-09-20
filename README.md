@@ -185,7 +185,7 @@ VITE_API_BASE_URL=http://localhost:5000/api
 | Role | Username | Password |
 |------|----------|----------|
 | **Administrator** | `admin` | `Admin@123` |
-| **Sub-Administrator** | `subadmin` | `SubAdmin@123` |
+| **Sup-Administrator** | `subadmin` | `SubAdmin@123` |
 
 ---
 

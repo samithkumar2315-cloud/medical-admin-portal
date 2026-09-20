@@ -43,7 +43,7 @@ const ProfileDropdown = () => {
         <div className="profile-avatar">{initials}</div>
         <div className="profile-trigger-info">
           <div className="name">{user?.fullName}</div>
-          <div className="role">{user?.role === 'SubAdministrator' ? 'Sub-Administrator' : user?.role}</div>
+          <div className="role">{user?.role === 'SubAdministrator' ? 'Sup Administrator' : user?.role}</div>
         </div>
         <span className="chevron">▾</span>
       </button>
