@@ -14,6 +14,28 @@ The portal is packaged and deployed as a unified production release on port `500
 
 ---
 
+## Deploy to GitHub Pages (Live Cloud Demo)
+
+The project includes automated GitHub Actions CI/CD to host the frontend portal directly on GitHub Pages with instant standalone demo mode:
+
+1. **Push your code to GitHub**:
+   - Double-click `push-to-github.bat`, OR run:
+     ```bash
+     git add -A
+     git commit -m "Deploy update"
+     git push origin main
+     ```
+2. **Enable GitHub Pages**:
+   - Go to your repository on GitHub: `https://github.com/samithkumar2315-cloud/medical-admin-portal`
+   - Click **Settings** (tab at top)
+   - In the left sidebar, click **Pages**
+   - Under **Build and deployment** > **Source**, select **GitHub Actions**
+3. **View Live Site**:
+   - GitHub Actions will automatically build and publish your portal.
+   - Live URL: `https://samithkumar2315-cloud.github.io/medical-admin-portal/`
+
+---
+
 ## Features
 
 - **JWT Authentication** — Secure login with hashed passwords (BCrypt)

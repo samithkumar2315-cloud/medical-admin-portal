@@ -21,18 +21,28 @@ if (-not $RepoUrl) {
     }
 }
 
-# Remove existing origin if already present
-git remote remove origin 2>$null
+# Ensure remote origin is set
+$currentOrigin = git remote get-url origin 2>$null
+if ($currentOrigin -ne $RepoUrl) {
+    git remote remove origin 2>$null
+    Write-Host "`nSetting remote origin to: $RepoUrl" -ForegroundColor Yellow
+    git remote add origin $RepoUrl
+}
 
-# Add new origin and push
-Write-Host "`nSetting remote origin to: $RepoUrl" -ForegroundColor Yellow
-git remote add origin $RepoUrl
+# Check for uncommitted changes and commit
+$status = git status --porcelain
+if ($status) {
+    Write-Host "`nStaging and committing latest changes..." -ForegroundColor Yellow
+    git add -A
+    git commit -m "Configure GitHub Pages deployment and universal routing"
+}
 
-Write-Host "Pushing main branch to GitHub..." -ForegroundColor Cyan
+Write-Host "`nPushing main branch to GitHub..." -ForegroundColor Cyan
 git push -u origin main
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "`n✓ Successfully pushed to GitHub!" -ForegroundColor Green
+    Write-Host "If GitHub Pages is enabled (Settings -> Pages -> GitHub Actions), deployment will trigger automatically!" -ForegroundColor Cyan
 } else {
     Write-Host "`nPush failed. Check your GitHub repository URL and authentication." -ForegroundColor Red
 }
